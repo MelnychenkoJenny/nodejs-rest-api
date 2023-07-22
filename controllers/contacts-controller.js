@@ -1,11 +1,4 @@
 import { Contact } from "../models/contact.js";
-// import {
-//   listContacts,
-//   getContactById,
-//   removeContact,
-//   addContact,
-//   updateContact,
-// } from '../models/contacts.js'
 import { HttpError, ctrlWrapper } from "../helpers/index.js";
 
 const getAll = async (req, res) => {
