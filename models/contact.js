@@ -1,8 +1,7 @@
 import { Schema, model } from "mongoose";
-import { handleMongooseError } from "../helpers/index.js";
+import { handleMongooseError, validateAtUpdate } from "./hooks.js";
 import Joi from "joi";
-
-const phoneRegexp = /^(?:(?:\+?|\()?[\d\s()-]*\d[\d\s()-]*){7,14}$/;
+import { phoneRegexp } from "../constants/contact-constants.js";
 
 const contactSchema = new Schema(
   {
@@ -23,11 +22,19 @@ const contactSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
+    },
   },
   { versionKey: false, timestamps: true }
 );
 
+contactSchema.pre("findOneAndUpdate", validateAtUpdate);
+
 contactSchema.post("save", handleMongooseError);
+contactSchema.post("findOneAndUpdate", handleMongooseError);
 
 const addSchema = Joi.object({
   name: Joi.string().required().messages({
