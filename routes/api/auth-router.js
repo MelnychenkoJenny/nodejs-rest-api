@@ -1,7 +1,7 @@
 import express from "express";
 import ctrl from "../../controllers/auth-controller.js";
 import { validateBody } from "../../decorators/index.js";
-import { authenticate } from "../../middlewares/index.js";
+import { authenticate, upload } from "../../middlewares/index.js";
 import { schemas } from "../../models/user.js";
 
 const router = express.Router();
@@ -20,5 +20,7 @@ router.patch(
   validateBody(schemas.updateSubcriptionSchema),
   ctrl.updateSubscription
 );
+
+router.patch("/avatars", authenticate, upload.single("avatar"), ctrl.updateAvatar);
 
 export default router;
