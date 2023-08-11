@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.js";
-import { HttpError, sendEmail } from "../helpers/index.js";
+import { HttpError, sendEmail, createVerifyEmail } from "../helpers/index.js";
 import { ctrlWrapper } from "../decorators/index.js";
 import gravatar from "gravatar";
 import path from "path";
@@ -13,7 +13,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const { SECRET_KEY, BASE_URL } = process.env;
+const { SECRET_KEY } = process.env;
 
 const avatarDir = path.resolve("public", "avatars");
 
@@ -34,11 +34,7 @@ const register = async (req, res) => {
     avatarUrl,
     verificationCode,
   });
-  const verifyEmail = {
-    to: email,
-    subject: "Verify email",
-    html: `<a target="_blank" href="${BASE_URL}/api/auth/verify/${verificationCode}">Click verify email</a>`,
-  };
+  const verifyEmail = createVerifyEmail({ email, verificationCode });
 
   await sendEmail(verifyEmail);
 
@@ -57,14 +53,14 @@ const verifyEmail = async (req, res) => {
   const { verificationCode } = req.params;
   const user = await User.findOne({ verificationCode });
   if (!user) {
-    throw HttpError(401, "Email not found");
+    throw HttpError(404, "User not found");
   }
   await User.findByIdAndUpdate(user._id, {
     verify: true,
     verificationCode: "",
   });
-  res.json({
-    message: "Email verify success",
+  res.status(200).json({
+    message: "Verification successful",
   });
 };
 
@@ -72,17 +68,16 @@ const resendVerifyEmail = async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
   if (!user) {
-    throw HttpError(401, "Email not found");
+    throw HttpError(400, "Email not found");
   }
   if (user.verify) {
-    throw HttpError(401, "Email already verify");
+    throw HttpError(400, "Verification has already been passed");
   }
 
-  const verifyEmail = {
-    to: email,
-    subject: "Verify email",
-    html: `<a target="_blank" href="${BASE_URL}/api/auth/verify/${user.verificationCode}">Click verify email</a>`,
-  };
+  const verifyEmail = createVerifyEmail({
+    email,
+    verificationCode: user.verificationCode,
+  });
 
   await sendEmail(verifyEmail);
 

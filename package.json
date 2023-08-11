@@ -6,10 +6,12 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production node ./server.js",
     "start:dev": "cross-env NODE_ENV=development nodemon ./server.js",
+    "start:devtest": "cross-env NODE_ENV=development nodemon ./tests.js",
     "lint": "eslint **/*.js",
     "lint:fix": "eslint --fix **/*.js"
   },
   "dependencies": {
+    "@elasticemail/elasticemail-client": "^4.0.23",
     "bcrypt": "^5.1.0",
     "cors": "2.8.5",
     "cross-env": "7.0.3",
